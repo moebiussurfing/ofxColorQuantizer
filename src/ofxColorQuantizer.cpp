@@ -2,20 +2,38 @@
 #include "ofxColorQuantizer.h"
 
 ofxColorQuantizer::ofxColorQuantizer() {
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 
 	// set default # of colors
 	numColors = 12;
 }
 
+bool ofxColorQuantizer::isReady() {
+	if (bReady) {
+		bReady = false;
+		return true;
+	}
+	return false;
+}
+
+bool ofxColorQuantizer::isProcessing() {
+	return bProcessing;
+}
+
 void ofxColorQuantizer::threadedFunction() {
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
+
 	while (isThreadRunning())
 	{
 		if (lock())
 		{
 			// Perform the color quantization here
 			// palette = ...
-			ready = false;
+			bReady = false;
+			bProcessing = true;
+			auto t = ofGetElapsedTimeMillis();
 
+			//--
 
 			const int colorCount = numColors;
 			const int sampleCount = inputImage.getHeight() * inputImage.getWidth();
@@ -40,6 +58,7 @@ void ofxColorQuantizer::threadedFunction() {
 			cv::kmeans(colorSamples, colorCount, labels, cv::TermCriteria(), 2, cv::KMEANS_RANDOM_CENTERS, clusters);
 			//cv::TermCriteria::COUNT, 8, 0 
 
+#if 1
 			// calculate histogram
 			histogram.clear();
 			histogram.resize(colorCount);
@@ -52,7 +71,7 @@ void ofxColorQuantizer::threadedFunction() {
 				histogram[i] = histogram[i] / colorSamples.rows;
 				sum += histogram[i];
 			}
-
+#endif
 
 			// clear our list of colors
 			colors.clear();
@@ -78,16 +97,21 @@ void ofxColorQuantizer::threadedFunction() {
 			}
 			*/
 
-			ready = true;
+			bReady = true;
+			bProcessing = false;
+			timeForLastProcess = ofGetElapsedTimeMillis() - t;
+
+			//--
 
 			unlock();
 			break;
 		}
-
 	}
 }
 
 void ofxColorQuantizer::quantize(ofPixels inputImage) {
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
+	
 	if (isThreadRunning()) {
 		ofLogNotice() << "Quantization already in progress. Please wait.";
 		return;
@@ -102,6 +126,7 @@ void ofxColorQuantizer::quantize(ofPixels inputImage) {
 }
 
 void ofxColorQuantizer::draw(ofPoint pos) {
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 
 	int swatchSize = 20;
 	int swatchID = 0;
@@ -123,26 +148,26 @@ void ofxColorQuantizer::draw(ofPoint pos) {
 }
 
 void ofxColorQuantizer::draw(int x, int y) {
-
 	draw(ofPoint(x, y));
 }
 
 vector<ofColor>& ofxColorQuantizer::getColors() {
-
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 	return colors;
 }
 
 void ofxColorQuantizer::setNumColors(unsigned int nColors) {
-
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 	numColors = nColors;
 }
 
 int ofxColorQuantizer::getNumColors() {
-
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 	return numColors;
 }
 
 vector< float > ofxColorQuantizer::getColorWeights() {
-	return histogram;
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
+		return histogram;
 }
 

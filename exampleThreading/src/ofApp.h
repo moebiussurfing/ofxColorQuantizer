@@ -24,10 +24,7 @@ public:
 
     void drawBg();
     ofParameter<ofColor> colorBg{"ColorBg", ofColor(64), ofColor(), ofColor()};
-    bool bError = 0;
-    bool bWait = 0;
     float v = 1;
-    uint64_t timeForLastProcess;
 
     void keyPressed(int key);
     void keyReleased(int key);
@@ -45,7 +42,7 @@ public:
         float distance;
     };
     
-    vector< weightedColor > sortedColors;
+    vector<weightedColor> sortedColors;
     
     struct by_distance {
         bool operator()(weightedColor const &a, weightedColor const &b) {

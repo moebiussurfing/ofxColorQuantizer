@@ -21,18 +21,13 @@ bool compareSaturation(const colorMapping& s1, const colorMapping& s2) {
 //----
 
 void ofApp::buildQuantize() {
-	bWait = 1;
 	v = 1;
-	auto t = ofGetElapsedTimeMillis();
 
 	// Perform the quantization process here...
 	// Example: Call the quantizer function from your addon.
 	// Replace "quantizerFunction()" with the actual function name from your addon.
 	// quantizerFunction();
 	build();
-	
-	bWait = 0;
-	timeForLastProcess = ofGetElapsedTimeMillis() - t;
 }
 
 //--------------------------------------------------------------
@@ -59,8 +54,32 @@ void ofApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofApp::update() {
+void ofApp::update() 
+{
+	if (colorQuantizer.isReady())
+	{
+		palette = colorQuantizer.getColors();
 
+		//--
+
+		sortedColors.clear();;
+		sortedColors.resize(colorQuantizer.getNumColors());
+		for (int i = 0; i < colorQuantizer.getNumColors(); i++)
+		{
+			ofFloatColor fc = ofFloatColor(colorQuantizer.getColors()[i].r / 255.0, colorQuantizer.getColors()[i].g / 255.0, colorQuantizer.getColors()[i].b / 255.0);
+			ofVec3f labCol = ColorConverter::rgbToLab(fc);
+
+			sortedColors[i].distance = ColorConverter::calcChroma(labCol);
+			sortedColors[i].color = colorQuantizer.getColors()[i];
+			sortedColors[i].weight = colorQuantizer.getColorWeights()[i];
+		}
+
+		std::sort(sortedColors.begin(), sortedColors.end(), by_distance());
+
+		//--
+
+		map_setup();
+	}
 }
 
 //--------------------------------------------------------------
@@ -68,88 +87,93 @@ void ofApp::draw()
 {
 	drawBg();
 
-	int x = 50;//x pad for left/right window
+	//--
+	
+	//x pad for left/right window
+	int x = 50;
 	boxPad = 2;
 
-	//-
+	//--
 
 	// debug text
 	ofDrawBitmapStringHighlight("Loaded image path/url: '" + imageName + "'", 10, 20, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Select image: [01234567][qwe][asd][zxc]", 10, 40, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Sorting: " + labelStr.get(), 10, 70, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Change sorting: [backspace]", 10, 90, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight("Last Process Time: " + ofToString(timeForLastProcess) +"ms", 10, 110, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("Last Process Time: " + ofToString(colorQuantizer.getTimeforLastProcess()) +"ms", 10, 110, ofColor::black, ofColor::white);
 
-	return;
+	//--
 
-	ofPushMatrix();
-	ofTranslate(x, 200);
-	ofSetColor(255);
+	if (palette.size() > 0) {
 
-	// draw original image but resized to ImgW pixels width, same aspect ratio
-	float imgRatio = image.getHeight() / image.getWidth();
-	int ImgW = 200;
-	int imgH = imgRatio * ImgW;
-
-	image.draw(0, 0, ImgW, imgH);
-
-	wPal = ofGetWidth() - (x + ImgW + x);
-	boxW = wPal / colorQuantizer.getNumColors();
-	boxSize = boxW - boxPad;
-
-	ofPushMatrix();
-	ofTranslate(0, imgH);
-
-	ofSetColor(255, 100);
-	ofDrawBitmapString("(Original sorting has colors weighted based on their areas, their order is based on their chroma values)", 0, 50);
-
-	ofTranslate(ImgW + 20, 0);
-
-	// all colors % bars
-	for (int i = 0; i < colorQuantizer.getNumColors(); i++)
-	{
-		//if (i > (sortedColors.size() - 1)) break;
-
-		ofSetColor(0, 50);
-		ofDrawRectangle(i * (boxSize + boxPad), 0, boxSize, -imgH);
-		ofSetColor(sortedColors[i].color);
-		ofDrawRectangle(i * (boxSize + boxPad), 0, boxSize, ofMap(sortedColors[i].weight, 0, 1, 0, -imgH));
+		ofPushMatrix();
+		ofTranslate(x, 200);
 		ofSetColor(255);
-		ofDrawBitmapString(ofToString(int(sortedColors[i].weight * 100)) + "%", i * (boxSize + boxPad), 30);
+
+		// draw original image but resized to ImgW pixels width, same aspect ratio
+		float imgRatio = image.getHeight() / image.getWidth();
+		int ImgW = 200;
+		int imgH = imgRatio * ImgW;
+
+		image.draw(0, 0, ImgW, imgH);
+
+		wPal = ofGetWidth() - (x + ImgW + x);
+		boxW = wPal / colorQuantizer.getNumColors();
+		boxSize = boxW - boxPad;
+
+		ofPushMatrix();
+		ofTranslate(0, imgH);
+
+		ofSetColor(255, 100);
+		ofDrawBitmapString("(Original sorting has colors weighted based on their areas, their order is based on their chroma values)", 0, 50);
+
+		ofTranslate(ImgW + 20, 0);
+
+		// all colors % bars
+		for (int i = 0; i < colorQuantizer.getNumColors(); i++)
+		{
+			//if (i > (sortedColors.size() - 1)) break;
+
+			ofSetColor(0, 50);
+			ofDrawRectangle(i * (boxSize + boxPad), 0, boxSize, -imgH);
+			ofSetColor(sortedColors[i].color);
+			ofDrawRectangle(i * (boxSize + boxPad), 0, boxSize, ofMap(sortedColors[i].weight, 0, 1, 0, -imgH));
+			ofSetColor(255);
+			ofDrawBitmapString(ofToString(int(sortedColors[i].weight * 100)) + "%", i * (boxSize + boxPad), 30);
+		}
+
+		// palette preview
+		ofTranslate(0, 100);
+		draw_Palette_Preview();
+
+		ofPopMatrix();
+		ofPopMatrix();
 	}
 
-	// palette preview
-	ofTranslate(0, 100);
-	draw_Palette_Preview();
-
-	ofPopMatrix();
-	ofPopMatrix();
-
-	//-
+	//--
 
 	gui.draw();
 }
 //--------------------------------------------------------------
 void ofApp::drawBg()
 {
-	if (bError)
-	{
-		// Red if error.
-		float v = glm::cos(10 * ofGetElapsedTimef());
-		float a1 = ofMap(v, -1, 1, 100, 200, true);
-		ofColor c = ofColor(a1, 0, 0);
-		ofClear(c);
-	}
-	else if (bWait)
+	//if (bError)
+	//{
+	//	// Red if error.
+	//	float v = glm::cos(10 * ofGetElapsedTimef());
+	//	float a1 = ofMap(v, -1, 1, 100, 200, true);
+	//	ofColor c = ofColor(a1, 0, 0);
+	//	ofClear(c);
+	//}
+	//else 
+	if (colorQuantizer.isProcessing())
 	{
 		// Fade blink when waiting. 
 		ofColor c = colorBg.get();
-		//ofColor c = bigTextInput.getColor();
 		auto br = c.getBrightness();
 		float g = 30; //amplitude
 		float v = glm::cos(10 * ofGetElapsedTimef());
 		float a1 = ofMap(v, -1, 1, br - g, br, true);
-		//float a1 = ofMap(v, -1, 1, 100, 150, true);
 		c.setBrightness(a1);
 		ofClear(c);
 	}
@@ -172,25 +196,6 @@ void ofApp::build() {
 
 	colorQuantizer.setNumColors(numColors);
 	colorQuantizer.quantize(imageCopy.getPixels());
-	return;
-
-	//sortedColors.clear();;
-	//sortedColors.resize(colorQuantizer.getNumColors());
-	//for (int i = 0; i < colorQuantizer.getNumColors(); i++)
-	//{
-	//	ofFloatColor fc = ofFloatColor(colorQuantizer.getColors()[i].r / 255.0, colorQuantizer.getColors()[i].g / 255.0, colorQuantizer.getColors()[i].b / 255.0);
-	//	ofVec3f labCol = ColorConverter::rgbToLab(fc);
-
-	//	sortedColors[i].distance = ColorConverter::calcChroma(labCol);
-	//	sortedColors[i].color = colorQuantizer.getColors()[i];
-	//	sortedColors[i].weight = colorQuantizer.getColorWeights()[i];
-	//}
-
-	//std::sort(sortedColors.begin(), sortedColors.end(), by_distance());
-
-	//--
-
-	map_setup();
 }
 
 //--------------------------------------------------------------

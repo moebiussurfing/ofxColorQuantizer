@@ -17,7 +17,6 @@
 class ofxColorQuantizer : public ofThread {
 
 public:
-	
 	ofxColorQuantizer();
 	
 	~ofxColorQuantizer() {
@@ -32,7 +31,7 @@ public:
 	void setNumColors(unsigned int nColors);
 	int getNumColors();
 	
-	vector<ofColor> & getColors();
+	vector<ofColor>& getColors();
     vector<float> getColorWeights();
 	
 protected:	
@@ -44,6 +43,14 @@ protected:
 
 	void threadedFunction();
 	
-	bool ready = false;
+	bool bReady = false;
+	bool bProcessing = false;
+	uint64_t timeForLastProcess;
+
+public:
+	uint64_t getTimeforLastProcess(){ return timeForLastProcess; };
+	bool isReady();
+	bool isProcessing();
+	
 
 };
