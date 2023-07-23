@@ -14,6 +14,7 @@ void ofxColorQuantizer::threadedFunction() {
 		{
 			// Perform the color quantization here
 			// palette = ...
+			ready = false;
 
 
 			const int colorCount = numColors;

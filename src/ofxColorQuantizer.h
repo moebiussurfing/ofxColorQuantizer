@@ -43,5 +43,7 @@ protected:
     vector<float>histogram;
 
 	void threadedFunction();
+	
+	bool ready = false;
 
 };
