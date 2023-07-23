@@ -14,13 +14,17 @@
 \ ----------------------------------------------- */
  
 
-class ofxColorQuantizer {
+class ofxColorQuantizer : public ofThread {
 
 public:
 	
 	ofxColorQuantizer();
 	
-	vector<ofColor> & quantize(ofPixels image);
+	~ofxColorQuantizer() {
+		waitForThread(true);
+	}
+
+	void quantize(ofPixels image);
 	
 	void draw(ofPoint pos = ofPoint(0, 0)); 
 	void draw(int x, int y);
@@ -29,9 +33,15 @@ public:
 	int getNumColors();
 	
 	vector<ofColor> & getColors();
+    vector<float> getColorWeights();
 	
 protected:	
-	
+	ofPixels inputImage;
+
 	vector<ofColor>colors;
 	unsigned int numColors;
+    vector<float>histogram;
+
+	void threadedFunction();
+
 };
