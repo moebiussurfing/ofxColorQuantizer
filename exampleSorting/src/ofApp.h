@@ -5,9 +5,6 @@
 #include "ofxColorQuantizer.h"
 #include "ofxGui.h"
 
-#include <thread>
-#include <mutex>
-
 typedef struct {
     int pos;
     ofColor color;
@@ -21,13 +18,12 @@ public:
     void setup();
     void update();
     void draw();
-
-    void drawBg();
-    ofParameter<ofColor> colorBg{"ColorBg", ofColor(64), ofColor(), ofColor()};
-    float v = 1;
-
     void keyPressed(int key);
     void keyReleased(int key);
+
+    void drawBg();
+    ofParameter<ofColor> colorBg{"ColorBg", ofColor::grey, ofColor(), ofColor()};
+    float v = 1;
 
     ofxColorQuantizer colorQuantizer;
     void quantizeImage(string imageName, int numColors);
@@ -50,16 +46,14 @@ public:
         }
     };
 
-    void build();//split from quantizer to avoid reload image
-
     //-
 
     void buildFromImageFile(string path, int num);
     void buildFromImageUrl(string url, int num);
 
     void map_setup();
-    map < int, ofColor > colorMap;
-    vector < colorMapping > colorMapSortable;
+    map <int, ofColor> colorMap;
+    vector <colorMapping> colorMapSortable;
 
     ofxPanel gui;
     ofParameter<int> sortedType;

@@ -20,6 +20,21 @@ bool ofxColorQuantizer::isProcessing() {
 	return bProcessing;
 }
 
+void ofxColorQuantizer::quantize(ofPixels inputImage) {
+	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
+	
+	if (isThreadRunning()) {
+		ofLogNotice() << "Quantization already in progress. Please wait.";
+		return;
+	}
+
+	// Copy the input image to a member variable
+	this->inputImage = inputImage;
+
+	// Start the thread
+	startThread();
+}
+
 void ofxColorQuantizer::threadedFunction() {
 	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 
@@ -107,22 +122,6 @@ void ofxColorQuantizer::threadedFunction() {
 			break;
 		}
 	}
-}
-
-void ofxColorQuantizer::quantize(ofPixels inputImage) {
-	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
-	
-	if (isThreadRunning()) {
-		ofLogNotice() << "Quantization already in progress. Please wait.";
-		return;
-	}
-
-	// Copy the input image to a member variable
-	this->inputImage = inputImage;
-
-	// Start the thread
-	//startThread();
-	threadedFunction();
 }
 
 void ofxColorQuantizer::draw(ofPoint pos) {

@@ -20,16 +20,6 @@ bool compareSaturation(const colorMapping& s1, const colorMapping& s2) {
 
 //----
 
-void ofApp::buildQuantize() {
-	v = 1;
-
-	// Perform the quantization process here...
-	// Example: Call the quantizer function from your addon.
-	// Replace "quantizerFunction()" with the actual function name from your addon.
-	// quantizerFunction();
-	build();
-}
-
 //--------------------------------------------------------------
 void ofApp::setup()
 {
@@ -96,8 +86,8 @@ void ofApp::draw()
 	//--
 
 	// debug text
-	ofDrawBitmapStringHighlight("Loaded image path/url: '" + imageName + "'", 10, 20, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight("Select image: [01234567][qwe][asd][zxc]", 10, 40, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("Loaded image Path/Url: '" + imageName + "'", 10, 20, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("Select image: Key [01234567][qwe][asd][zxc]", 10, 40, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Sorting: " + labelStr.get(), 10, 70, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Change sorting: [backspace]", 10, 90, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("Last Process Time: " + ofToString(colorQuantizer.getTimeforLastProcess()) +"ms", 10, 110, ofColor::black, ofColor::white);
@@ -118,7 +108,7 @@ void ofApp::draw()
 		image.draw(0, 0, ImgW, imgH);
 
 		wPal = ofGetWidth() - (x + ImgW + x);
-		boxW = wPal / colorQuantizer.getNumColors();
+		boxW = wPal / palette.size();
 		boxSize = boxW - boxPad;
 
 		ofPushMatrix();
@@ -130,10 +120,8 @@ void ofApp::draw()
 		ofTranslate(ImgW + 20, 0);
 
 		// all colors % bars
-		for (int i = 0; i < colorQuantizer.getNumColors(); i++)
+		for (int i = 0; i < palette.size(); i++)
 		{
-			//if (i > (sortedColors.size() - 1)) break;
-
 			ofSetColor(0, 50);
 			ofDrawRectangle(i * (boxSize + boxPad), 0, boxSize, -imgH);
 			ofSetColor(sortedColors[i].color);
@@ -157,15 +145,6 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::drawBg()
 {
-	//if (bError)
-	//{
-	//	// Red if error.
-	//	float v = glm::cos(10 * ofGetElapsedTimef());
-	//	float a1 = ofMap(v, -1, 1, 100, 200, true);
-	//	ofColor c = ofColor(a1, 0, 0);
-	//	ofClear(c);
-	//}
-	//else 
 	if (colorQuantizer.isProcessing())
 	{
 		// Fade blink when waiting. 
@@ -192,7 +171,13 @@ void ofApp::drawBg()
 }
 
 //--------------------------------------------------------------
-void ofApp::build() {
+void ofApp::buildQuantize() {
+
+	// Perform the quantization process here...
+	// Example: Call the quantizer function from your addon.
+	// Replace "quantizerFunction()" with the actual function name from your addon.
+	// quantizerFunction();
+	v = 1;
 
 	colorQuantizer.setNumColors(numColors);
 	colorQuantizer.quantize(imageCopy.getPixels());
@@ -383,28 +368,6 @@ void ofApp::keyPressed(int key) {
 			sortedType = 1;
 	}
 
-	//        if (key == '1'){
-	//            if (sortedType != 1){
-	//                sortedType = 1;
-	//            }
-	//        }
-	//        if (key == '2'){
-	//            if (sortedType != 2){
-	//                sortedType = 2;
-	//            }
-	//        }
-	//        else if (key == '3'){
-	//            if (sortedType != 3){
-	//                sortedType = 3;
-	//            }
-	//        }
-	//        else if (key == '4'){
-	//            if (sortedType != 4){
-	//                sortedType = 4;
-	//            }
-	//        }
-
-
 	//-
 
 	// test kMeansTest
@@ -415,7 +378,6 @@ void ofApp::keyPressed(int key) {
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}
-
 
 //--------------------------------------------------------------
 void ofApp::map_setup()
@@ -471,20 +433,17 @@ void ofApp::map_setup()
 	}
 }
 
-
 //--------------------------------------------------------------
 void ofApp::buildFromImageFile(string path, int num) {
 	//TODO: improve with threading load..
 	quantizeImage(path, num);
 }
 
-
 //--------------------------------------------------------------
 void ofApp::buildFromImageUrl(string url, int num) {
 	//TODO: improve with threading load and some HTTP image browsing api..
 	quantizeImage(url, num);
 }
-
 
 //--------------------------------------------------------------
 void ofApp::draw_Palette_Preview()

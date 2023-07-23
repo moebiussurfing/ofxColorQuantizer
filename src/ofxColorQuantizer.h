@@ -33,7 +33,8 @@ public:
 	
 	vector<ofColor>& getColors();
     vector<float> getColorWeights();
-	
+	float getColorWeight(int index) { return histogram[index]; }
+
 protected:	
 	ofPixels inputImage;
 
