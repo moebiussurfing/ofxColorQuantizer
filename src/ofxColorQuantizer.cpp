@@ -8,6 +8,11 @@ ofxColorQuantizer::ofxColorQuantizer() {
 	numColors = 12;
 }
 
+ofxColorQuantizer::~ofxColorQuantizer() {
+
+	waitForThread(true);
+}
+
 void ofxColorQuantizer::quantize(ofPixels inputImage) {
 	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 

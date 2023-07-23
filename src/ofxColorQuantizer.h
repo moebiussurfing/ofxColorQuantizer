@@ -19,10 +19,8 @@ class ofxColorQuantizer : public ofThread {
 public:
 	ofxColorQuantizer();
 
-	~ofxColorQuantizer() {
-		waitForThread(true);
-	}
-
+	~ofxColorQuantizer();
+	
 	void quantize(ofPixels image);
 
 	void draw(ofPoint pos = ofPoint(0, 0));
