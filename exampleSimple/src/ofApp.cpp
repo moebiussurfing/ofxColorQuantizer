@@ -11,10 +11,9 @@ void ofApp::setup()
 
 	parameters.setName("COLOR QUANTIZER");
 	parameters.add(numColors.set("Number of Colors", 10, 1, 50));
-	parameters.add(labelStr.set(" ", labelStr));
-	parameters.add(bReBuild.set("Build", false));
+	parameters.add(bReBuild.set("Build"));
 
-	gui.setup();
+	gui.setup("ofxColorQuantizer");
 	gui.add(parameters);
 	gui.setPosition(450, 50);
 
@@ -224,16 +223,13 @@ void ofApp::Changed_parameters(ofAbstractParameter& e) {
 
 	if (n == bReBuild.getName())
 	{
-		if (bReBuild)
-		{
-			bReBuild = false;
-			doBuildQuantize();
-		}
+		doBuildQuantize();
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
+	ofLogNotice("ofApp") << __FUNCTION__<< char(key);
 
 	// Pick files
 
@@ -267,6 +263,7 @@ void ofApp::keyPressed(int key) {
 		imageName = "0.jpg";
 		buildFromImageFile(imageName, numColors);
 	}
+
 	else if (key == '1')
 	{
 		imageName = "1.jpg";
@@ -386,43 +383,7 @@ void ofApp::keyPressed(int key) {
 		imageName = "https://store-images.s-microsoft.com/image/apps.33776.13570837168441901.d8820ad6-c4ef-45a9-accb-c6dd763aee48.560134ce-5fa0-4486-95cd-b0ba8d4921ff?w=672&h=378&q=80&mode=letterbox&background=%23FFE4E4E4&format=jpg";
 		buildFromImageFile(imageName, numColors);
 	}
-
-	//--
-
-	// Test kMeansTest
-	if (key == 'k') {
-		kMeansTest();
-	}
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}
-
-//--------------------------------------------------------------
-void ofApp::kMeansTest() {
-
-	// For testing
-
-	cv::Mat samples = (cv::Mat_<float>(8, 1) << 31, 2, 10, 11, 25, 27, 2, 1);
-	cv::Mat labels;
-
-	// double kMeans(const Mat& samples, int clusterCount, Mat& labels,
-	cv::TermCriteria termcrit;
-	int attempts, flags;
-	cv::Mat centers;
-	double compactness = cv::kmeans(samples, 3, labels, cv::TermCriteria(), 2, cv::KMEANS_PP_CENTERS, centers);
-
-	ofLogNotice() << "labels:";
-	for (int i = 0; i < labels.rows; ++i)
-	{
-		ofLogNotice() << labels.at<int>(0, i);
-	}
-
-	ofLogNotice() << "\ncenters:" << endl;
-	for (int i = 0; i < centers.rows; ++i)
-	{
-		ofLogNotice() << centers.at<float>(0, i);
-	}
-
-	ofLogNotice() << "\ncompactness: " << compactness;;
-}

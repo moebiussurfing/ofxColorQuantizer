@@ -26,12 +26,11 @@ public:
     
     string imageName;
     ofImage image;
-    ofImage imageCopy;
+    ofImage imageCopy;//use an smaller image to improve speed processing!
 
     ofParameterGroup parameters;
     ofParameter<int> numColors;
-    ofParameter<string> labelStr;
-    ofParameter<bool> bReBuild;
+    ofParameter<void> bReBuild;
     void Changed_parameters(ofAbstractParameter &e);
     ofxPanel gui;
 
@@ -39,11 +38,8 @@ public:
     int boxSize;
     int boxPad;
 
-    void kMeansTest();
-
-    void drawBg();
+    void drawBg();//blinks to reflect that quantization is threaded
     ofParameter<ofColor> colorBg{"ColorBg", ofColor::grey, ofColor(), ofColor()};
     float v = 1;
-
 };
 

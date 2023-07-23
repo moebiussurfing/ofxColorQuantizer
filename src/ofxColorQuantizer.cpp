@@ -8,23 +8,11 @@ ofxColorQuantizer::ofxColorQuantizer() {
 	numColors = 12;
 }
 
-bool ofxColorQuantizer::isReady() {
-	if (bReady) {
-		bReady = false;
-		return true;
-	}
-	return false;
-}
-
-bool ofxColorQuantizer::isProcessing() {
-	return bProcessing;
-}
-
 void ofxColorQuantizer::quantize(ofPixels inputImage) {
 	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
-	
+
 	if (isThreadRunning()) {
-		ofLogNotice() << "Quantization already in progress. Please wait.";
+		ofLogWarning("ofxColorQuantizer") << "Quantization already in progress. Please wait.";
 		return;
 	}
 
@@ -47,6 +35,7 @@ void ofxColorQuantizer::threadedFunction() {
 			bReady = false;
 			bProcessing = true;
 			auto t = ofGetElapsedTimeMillis();
+			timeForLastProcess = 0;
 
 			//--
 
@@ -124,6 +113,18 @@ void ofxColorQuantizer::threadedFunction() {
 	}
 }
 
+bool ofxColorQuantizer::isReady() {
+	if (bReady) {
+		bReady = false;
+		return true;
+	}
+	return false;
+}
+
+bool ofxColorQuantizer::isProcessing() {
+	return bProcessing;
+}
+
 void ofxColorQuantizer::draw(ofPoint pos) {
 	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
 
@@ -167,6 +168,10 @@ int ofxColorQuantizer::getNumColors() {
 
 vector< float > ofxColorQuantizer::getColorWeights() {
 	ofLogNotice("ofxColorQuantizer") << __FUNCTION__;
-		return histogram;
+	return histogram;
 }
 
+float ofxColorQuantizer::getColorWeight(int index) {
+	if (index < histogram.size())
+		return histogram[index];
+}
