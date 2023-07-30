@@ -18,7 +18,6 @@ class ofxColorQuantizer : public ofThread {
 
 public:
 	ofxColorQuantizer();
-
 	~ofxColorQuantizer();
 	
 	void quantize(ofPixels image);

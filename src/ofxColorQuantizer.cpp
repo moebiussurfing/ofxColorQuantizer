@@ -23,6 +23,9 @@ void ofxColorQuantizer::quantize(ofPixels inputImage) {
 
 	// Copy the input image to a member variable
 	this->inputImage = inputImage;
+	
+	//fix
+	bReady = false;
 
 	// Start the thread
 	startThread();
@@ -91,7 +94,7 @@ void ofxColorQuantizer::threadedFunction() {
 			}
 
 			/*
-			// add colors from labelz
+			// add colors from labels
 			unsigned char * p = temp.getPixels();
 			cv::MatIterator_<int> labelIt = labels.begin<int>();
 			for(int i=0; i<colorCount; i++){
